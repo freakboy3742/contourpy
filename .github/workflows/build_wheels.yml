@@ -60,13 +60,13 @@ jobs:
           #   platform: macos
 
           # iOS
-          - os: macOS-15
+          - os: macOS-26
             arch: arm64_iphoneos
             platform: ios
-          - os: macOS-15
+          - os: macOS-26
             arch: arm64_iphonesimulator
             platform: ios
-          - os: macOS-15-intel
+          - os: macOS-26-intel
             arch: x86_64_iphonesimulator
             platform: ios
 
