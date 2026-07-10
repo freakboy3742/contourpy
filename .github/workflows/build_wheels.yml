@@ -24,42 +24,40 @@ jobs:
     name: ${{ matrix.platform }} ${{ matrix.arch }} wheels
     if: github.repository_owner == 'contourpy'
     runs-on: ${{ matrix.os }}
-    env:
-      CIBW_PRERELEASE_PYTHONS: True
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Linux
-          - os: ubuntu-24.04-arm
-            arch: aarch64
-            platform: linux
-          - os: ubuntu-24.04
-            arch: ppc64le
-            platform: linux
-          - os: ubuntu-24.04
-            arch: riscv64
-            platform: linux
-          - os: ubuntu-24.04
-            arch: s390x
-            platform: linux
-          - os: ubuntu-24.04
-            arch: x86_64
-            platform: linux
+          # # Linux
+          # - os: ubuntu-24.04-arm
+          #   arch: aarch64
+          #   platform: linux
+          # - os: ubuntu-24.04
+          #   arch: ppc64le
+          #   platform: linux
+          # - os: ubuntu-24.04
+          #   arch: riscv64
+          #   platform: linux
+          # - os: ubuntu-24.04
+          #   arch: s390x
+          #   platform: linux
+          # - os: ubuntu-24.04
+          #   arch: x86_64
+          #   platform: linux
 
-          # Pyodide
-          - os: ubuntu-24.04
-            arch: wasm32
-            platform: pyodide
+          # # Pyodide
+          # - os: ubuntu-24.04
+          #   arch: wasm32
+          #   platform: pyodide
 
-          # macOS
-          - os: macOS-14
-            arch: arm64
-            platform: macos
-          - os: macOS-15-intel
-            arch: x86_64
-            platform: macos
+          # # macOS
+          # - os: macOS-14
+          #   arch: arm64
+          #   platform: macos
+          # - os: macOS-15-intel
+          #   arch: x86_64
+          #   platform: macos
 
           # iOS
           - os: macOS-latest
@@ -72,16 +70,16 @@ jobs:
             arch: x86_64_iphonesimulator
             platform: ios
 
-          # Windows
-          - os: windows-2022
-            arch: AMD64
-            platform: windows
-          - os: windows-11-arm
-            arch: ARM64
-            platform: windows
-          - os: windows-2022
-            arch: x86
-            platform: windows
+          # # Windows
+          # - os: windows-2022
+          #   arch: AMD64
+          #   platform: windows
+          # - os: windows-11-arm
+          #   arch: ARM64
+          #   platform: windows
+          # - os: windows-2022
+          #   arch: x86
+          #   platform: windows
 
     steps:
       - name: Checkout source

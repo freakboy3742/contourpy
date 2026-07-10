@@ -140,6 +140,18 @@ before-test = "python -m pip install -v --only-binary=:all: --extra-index-url ht
 select = "*-ios_*"
 environment = { PIP_EXTRA_INDEX_URL = "https://pypi.anaconda.org/beeware/simple" }
 
+[[tool.cibuildwheel.overrides]]
+# TEMPORARY diagnostic override for the cp315 ios_arm64_iphonesimulator
+# "Run-time dependency python found: NO" failure. Scoped to only the failing
+# identifier. Runs ci/diag_ios.sh (env/SDK/symlink/probe dump) and patches the
+# cross-venv meson to emit [DIAG] lines during Python dependency resolution.
+# --no-isolation is required so the build reuses the patched meson we install
+# into the cross venv (ninja is intentionally omitted; the xbuild-tools ninja
+# is already on PATH).
+select = "cp315-ios_arm64_iphonesimulator"
+build-frontend = { name = "build", args = ["--no-isolation"] }
+before-build = 'python -m pip install "meson==1.11.1" "meson-python==0.20.0" "pybind11>=2.13.2,!=2.13.3" && BEFORE_BUILD_DIR={project} sh {project}/ci/diag_ios.sh'
+
 [tool.codespell]
 ignore-words-list = "nd,socio-economic"
 
