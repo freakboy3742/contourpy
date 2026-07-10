@@ -43,14 +43,36 @@ printf '%s\n' \
   ' #include <Python.h>' \
   '#endif' > /tmp/diag_testfile.cpp
 
-echo "--- probe (mirrors Meson command line) ---"
+echo "--- clang version (active toolchain) ---"
+arm64-apple-ios-simulator-clang++ --version 2>&1 | head -2 || true
+
+echo "--- probe A: SIMULATOR wrapper (mirrors Meson command line; the failing case) ---"
 arm64-apple-ios-simulator-clang++ -I"$INC" /tmp/diag_testfile.cpp \
   -E -P -P -O0 -U_FORTIFY_SOURCE -fpermissive -Werror=implicit-function-declaration
-echo "probe exit=$?"
+echo "probe A (simulator) exit=$?"
 
-echo "--- verbose search paths (sysroot / framework / header search) ---"
+echo "--- probe B: explicit iphonesimulator SDK + arm64-simulator target ---"
+xcrun --sdk iphonesimulator clang++ -target "arm64-apple-ios${IPHONEOS_DEPLOYMENT_TARGET:-13.0}-simulator" \
+  -I"$INC" /tmp/diag_testfile.cpp \
+  -E -P -P -O0 -U_FORTIFY_SOURCE -fpermissive -Werror=implicit-function-declaration
+echo "probe B (explicit simulator sdk) exit=$?"
+
+echo "--- probe C: DEVICE SDK for contrast (this arch passes on device) ---"
+xcrun --sdk iphoneos clang++ -target "arm64-apple-ios${IPHONEOS_DEPLOYMENT_TARGET:-13.0}" \
+  -I"$INC" /tmp/diag_testfile.cpp \
+  -E -P -P -O0 -U_FORTIFY_SOURCE -fpermissive -Werror=implicit-function-declaration
+echo "probe C (device sdk) exit=$?"
+
+echo "--- probe D: simulator, but point -I straight at resolved framework Headers ---"
+REAL="$(python -c 'import os,sysconfig;print(os.path.realpath(sysconfig.get_config_var("INCLUDEPY")))' 2>/dev/null)"
+echo "resolved Headers dir: $REAL"
+arm64-apple-ios-simulator-clang++ -I"$REAL" /tmp/diag_testfile.cpp \
+  -E -P -P -O0 -U_FORTIFY_SOURCE -fpermissive -Werror=implicit-function-declaration
+echo "probe D (simulator, resolved -I) exit=$?"
+
+echo "--- verbose search paths for the SIMULATOR probe (why it does/doesn't resolve) ---"
 arm64-apple-ios-simulator-clang++ -v -I"$INC" /tmp/diag_testfile.cpp -E -P 2>&1 \
-  | grep -iE "sysroot|search starts|framework|ignoring|error|#include" | head -40
+  | grep -iE "sysroot|search starts|framework|ignoring|error|resource-dir|clang/[0-9]|#include" | head -50
 
 echo "==================== DIAG: patch meson for [DIAG] lines ===================="
 python "${BEFORE_BUILD_DIR:-.}/ci/diag_patch_meson.py" || true
