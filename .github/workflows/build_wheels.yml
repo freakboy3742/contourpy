@@ -60,10 +60,10 @@ jobs:
           #   platform: macos
 
           # iOS
-          - os: macOS-latest
+          - os: macOS-15
             arch: arm64_iphoneos
             platform: ios
-          - os: macOS-latest
+          - os: macOS-15
             arch: arm64_iphonesimulator
             platform: ios
           - os: macOS-15-intel
@@ -107,6 +107,18 @@ jobs:
         if: ${{ matrix.arch == 'x86' }}
         run: |
           rm /c/Program\ Files/Git/usr/bin/link.EXE
+
+      - name: Pin Xcode for iOS arm64 simulator diagnostic
+        # TEMPORARY: force Xcode 26.5 (clang 21) on the arm64 simulator job to
+        # reliably reproduce the "Run-time dependency python found: NO" failure,
+        # which only occurs with the clang 21 / iPhoneSimulator SDK + arm64 target
+        # combination. Other Xcode versions (e.g. 16.4 / clang 17) resolve the
+        # python.org XCframework's symlinked Headers dir and pass.
+        if: ${{ matrix.arch == 'arm64_iphonesimulator' }}
+        run: |
+          ls -d /Applications/Xcode_26.5.app 2>/dev/null && sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer || echo "Xcode_26.5 not present on this runner image"
+          xcodebuild -version || true
+          clang --version || true
 
       - name: Build wheels
         uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
